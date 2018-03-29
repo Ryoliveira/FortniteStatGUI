@@ -4,6 +4,7 @@ import configparser
 import requests
 import webbrowser
 
+
 # Load configuration file with API keys
 Config = configparser.ConfigParser()
 Config.read('tokens.ini')
@@ -13,128 +14,140 @@ HEADERS = {'TRN-Api-Key': TRN_key}
 
 
 class MainWindow(tkinter.Tk):
-    def __init__(self):
+    def __init__(self, user):
         super().__init__()
+        self.user = user
         self.player_stats = {}
         # Window settings
         self.title("Fortnite Stats")
-        self.geometry('500x365')
-        # self.resizable(False, False)
-        self.configure(background='light grey')
+        self.geometry('500x380')
+        self.resizable(False, False)
+        # Title Appearance Options
+        TITLE_COLOR = 'MediumPurple3'
+        TITLE_TEXT_COLOR = 'Black'
+        # Stat Appearance Options
+        STAT_BG_COLOR ='DodgerBlue2'
+        STAT_FG_COLOR = 'white'
+        STAT_CATAGORY_FONT = 'Arial 12 bold'
+        STAT_VALUE_FONT = 'Arial 12'
 
         # Title Bar Frame
         title_bar_frame = tkinter.Frame(self)
         title_bar_frame.pack(fill='x')
-        title_bar_frame.configure(background='purple')
+        title_bar_frame.configure(background=TITLE_COLOR)
         # Logo
         self.logo = ImageTk.PhotoImage(Image.open('fortnite-logo.png'))
-        tkinter.Label(title_bar_frame, image=self.logo,  bg='purple').grid(row=0, column=0, rowspan=2)
-        program_title = tkinter.Label(title_bar_frame, text='FORTNITE Stat Tracker', bg='purple')
+
+        tkinter.Label(title_bar_frame, image=self.logo,  bg=TITLE_COLOR).grid(row=0, column=0, rowspan=2)
+        program_title = tkinter.Label(title_bar_frame, text='FORTNITE Stat Tracker', bg=TITLE_COLOR, fg=TITLE_TEXT_COLOR)
         program_title.grid(row=0, column=1)
-        program_title.configure(font=("Arial", 26, 'bold'))
+        program_title.configure(font='Arial 26 bold underline')
 
         #API Credits
-        api_credits = tkinter.Label(title_bar_frame, text='Powered By: Fortnitetracker.com', bg='purple')
+        api_credits = tkinter.Label(title_bar_frame, text='Powered By: Fortnitetracker.com', bg=TITLE_COLOR, fg=TITLE_TEXT_COLOR)
         api_credits.grid(row=1, column=1)
-        api_credits.configure(font=("Arial", 18, 'bold'))
+        api_credits.configure(font='Arial 18 bold')
         api_credits.bind("<Button-1>", self.tracker_page)
-        #######################
-        #   Lifetime Stats    #
-        #######################
-        # Stat frame
+
+        # Lifetime Stat frame
         stat_frame = tkinter.Frame(self)
         stat_frame.pack(fill='x')
-        stat_frame.configure(bg='light blue')
+        stat_frame.configure(bg=STAT_BG_COLOR)
 
         # Account label
         self.account_name = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Account: ', font=('Arial', 12, "bold"), bg='light blue', fg='black').grid(row=0, column=0)
-        tkinter.Label(stat_frame, textvariable=self.account_name, font=('bold', 12), bg='light blue', fg='black').grid(row=0, column=1, sticky='w')
+        tkinter.Label(stat_frame, text='Account:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.account_name, font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=1, sticky='w')
 
         # Platform label
         self.platform = tkinter.StringVar()
         self.platform.set('PC')
-        tkinter.Label(stat_frame, text='Platform: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=1, column=0)
-        tkinter.Label(stat_frame, textvariable=self.platform, font=('bold', 12), bg='light blue', fg='black').grid(row=1, column=1, sticky='w')
+        tkinter.Label(stat_frame, text='Platform:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.platform, font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=1, sticky='w')
 
         # Check Boxes
-        tkinter.Checkbutton(stat_frame, text='Solo', bg='light blue', font=('Arial', 12, 'bold')).grid(row=0, column=2)
-        tkinter.Checkbutton(stat_frame, text='Duo', bg='light blue', font=('Arial', 12, 'bold')).grid(row=0, column=3)
-        tkinter.Checkbutton(stat_frame, text='Squad', bg='light blue', font=('Arial', 12, 'bold')).grid(row=0, column=4)
-
+        tkinter.Checkbutton(stat_frame, text='Solo', bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=3)
+        tkinter.Checkbutton(stat_frame, text='Duo', bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=4)
+        tkinter.Checkbutton(stat_frame, text='Squad', bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=5)
+        #######################
+        #   Lifetime Stats    #
+        #######################
         # Lifetime title label
-        tkinter.Label(stat_frame, text='==Lifetime Stats==', font=('Arial', 14, 'bold'), bg='light blue', fg='black').grid(row=2, column=1, columnspan=3, sticky='ew')
+        tkinter.Label(stat_frame, text='==Lifetime Stats==', font=('Arial', 14, 'bold'), bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=2, column=1, columnspan=3, sticky='ew')
 
         # Win label
         self.wins = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Wins: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=3, column=0, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.wins, font=('Arial', 12), bg='light blue', fg='black').grid(row=3, column=1, sticky='w')
+        tkinter.Label(stat_frame, text='Wins: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.wins, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=1, sticky='w')
 
         # Matches Played Label
         self.matches_played = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Matches Played: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=4, column=0, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.matches_played, font=('Arial', 12), bg='light blue', fg='black').grid(row=4, column=1, sticky='w')
+        tkinter.Label(stat_frame, text='Matches Played: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=4, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.matches_played, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=4, column=1, sticky='w')
 
         # Win Percentage Label
         self.win_per = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Win Percentage: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=5, column=0, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.win_per, font=('Arial', 12), bg='light blue', fg='black').grid(row=5, column=1, sticky='w')
+        tkinter.Label(stat_frame, text='Win Percentage: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=5, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.win_per, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=5, column=1, sticky='w')
 
         # Kills Label
         self.kills = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Kills: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=3, column=3, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.kills, font=('Arial', 12), bg='light blue', fg='black').grid(row=3, column=4, sticky='w')
+        tkinter.Label(stat_frame, text='Kills: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=4, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.kills, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=5, sticky='w')
 
-        # Kill/Death Ration Label0
+        # Kill/Death Ratio Label
         self.kdr = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='KDR: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=4, column=3, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.kdr, font=('Arial', 12), bg='light blue', fg='black').grid(row=4, column=4, sticky='w')
+        tkinter.Label(stat_frame, text='KDR: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=4, column=4, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.kdr, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=4, column=5, sticky='w')
 
         # Score Per Match Label
         self.spm = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Avg. Score:', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=5, column=3, sticky='e')
-        tkinter.Label(stat_frame, textvariable=self.spm, font=('Arial', 12), bg='light blue', fg='black').grid(row=5, column=4, sticky='w')
+        tkinter.Label(stat_frame, text='Avg. Score:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=5, column=4, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.spm, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=5, column=5, sticky='w')
         #######################
         #   Seasonal Stats    #
         #######################
         # Season Stat frame
         season_stat_frame = tkinter.Frame(self)
         season_stat_frame.pack(fill='x')
-        season_stat_frame.configure(bg='light blue')
+        season_stat_frame.configure(bg=STAT_BG_COLOR)
 
         # Season Title label
-        tkinter.Label(season_stat_frame, text='   ==Seasonal Stats==', font=('Arial', 14, 'bold'), bg='light blue', fg='black').grid(row=0, column=1, columnspan=3, sticky='ew')
+        tkinter.Label(season_stat_frame, text='==Seasonal Stats==', font=('Arial', 14, 'bold'), bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=1, columnspan=3, sticky='ew')
 
         # Win label
         self.season_wins = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='Wins: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=1, column=0, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_wins, font=('Arial', 12), bg='light blue', fg='black').grid(row=1, column=1, sticky='w')
+        tkinter.Label(season_stat_frame, text='Wins: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=0, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_wins, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=1, sticky='w')
 
         # Matches Played Label
         self.season_matches_played = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='Matches Played: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=2, column=0, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_matches_played, font=('Arial', 12), bg='light blue', fg='black').grid(row=2, column=1, sticky='w')
+        tkinter.Label(season_stat_frame, text='Matches Played: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=2, column=0, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_matches_played, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=2, column=1, sticky='w')
 
         # Win Percentage Label
         self.season_win_per = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='Win Percentage: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=3, column=0, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_win_per, font=('Arial', 12), bg='light blue', fg='black').grid(row=3, column=1, sticky='w')
+        tkinter.Label(season_stat_frame, text='Win Percentage: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=0, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_win_per, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=1, sticky='w')
 
         # Kills Label
         self.season_kills = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='Kills: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=1, column=3, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_kills, font=('Arial', 12), bg='light blue', fg='black').grid(row=1, column=4, sticky='w')
+        tkinter.Label(season_stat_frame, text='Kills: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=4, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_kills, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=5, sticky='w')
 
         # Kill/Death Ration Label
         self.season_kdr = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='KDR: ', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=2, column=3, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_kdr, font=('Arial', 12), bg='light blue', fg='black').grid(row=2, column=4, sticky='w')
+        tkinter.Label(season_stat_frame, text='KDR: ', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=2, column=4, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_kdr, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=2, column=5, sticky='w')
 
         # Avg score per match
         self.season_spm = tkinter.StringVar()
-        tkinter.Label(season_stat_frame, text='Avg. Score:', font=('Arial', 12, 'bold'), bg='light blue', fg='black').grid(row=3, column=3, sticky='e')
-        tkinter.Label(season_stat_frame, textvariable=self.season_spm, font=('Arial', 12), bg='light blue', fg='black').grid(row=3, column=4, sticky='w')
+        tkinter.Label(season_stat_frame, text='Avg. Score:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=4, sticky='e')
+        tkinter.Label(season_stat_frame, textvariable=self.season_spm, font=STAT_VALUE_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=3, column=5, sticky='w')
 
+        fortnite_link = tkinter.Label(self, text='Play FORTNITE For Free!')
+        fortnite_link.pack(side='right')
+        fortnite_link.bind('<Button-1>', self.game_page)
         self.solo_player_stats()
         self.update()
 
@@ -205,7 +218,7 @@ class MainWindow(tkinter.Tk):
         self.season_spm.set(season_squad_stats['scorePerMatch']['value'])
 
     def grab_player_profile(self):
-        user = 'Rhyn091'
+        user = self.user
         platform = 'pc'
         r = requests.get('https://api.fortnitetracker.com/v1/profile/{}/{}'.format(platform, user), headers=HEADERS)
         player_data = r.json()
@@ -216,8 +229,10 @@ class MainWindow(tkinter.Tk):
 
     def game_page(self, event):
         webbrowser.open_new(r"https://www.epicgames.com/fortnite/en-US/home")
+
+
 if __name__ == '__main__':
-    win = MainWindow()
+    win = MainWindow(user='Rhyn091')
     win.mainloop()
 
 
