@@ -1,4 +1,5 @@
 import tkinter
+from tkinter import messagebox
 from PIL import ImageTk, Image
 import configparser
 import requests
@@ -52,23 +53,23 @@ class MainWindow(tkinter.Tk):
         stat_frame = tkinter.Frame(self)
         stat_frame.pack(fill='x')
         stat_frame.configure(bg=STAT_BG_COLOR)
-        stat_frame.columnconfigure(2, weight=3)
+        stat_frame.columnconfigure(2, weight=1)
 
         # Check Boxes
         tkinter.Checkbutton(stat_frame, text='Solo', command=self.solo_player_stats, activebackground=STAT_BG_COLOR, activeforeground=STAT_FG_COLOR, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=3)
         tkinter.Checkbutton(stat_frame, text='Duo', command=self.duo_player_stats, activebackground=STAT_BG_COLOR, activeforeground=STAT_FG_COLOR, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=4)
-        tkinter.Checkbutton(stat_frame, text='Squad', command=self.squad_player_stats, activebackground=STAT_BG_COLOR, activeforeground=STAT_FG_COLOR, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=5)
+        tkinter.Checkbutton(stat_frame, text='Squad', command=self.squad_player_stats, activebackground=STAT_BG_COLOR, activeforeground=STAT_FG_COLOR, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR, font=STAT_CATAGORY_FONT).grid(row=0, column=5, sticky='w')
 
         # Account label
         self.account_name = tkinter.StringVar()
-        tkinter.Label(stat_frame, text='Account:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=0)
+        tkinter.Label(stat_frame, text='Account:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=0, sticky='e')
         tkinter.Label(stat_frame, textvariable=self.account_name, font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=0, column=1, sticky='w')
 
         # Platform label
         self.platform = tkinter.StringVar()
         self.platform.set('PC')
-        tkinter.Label(stat_frame, text='Platform:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=0)
-        tkinter.Label(stat_frame, textvariable=self.platform, font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=0, columnspan=2, sticky='e')
+        tkinter.Label(stat_frame, text='Platform:', font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=0, sticky='e')
+        tkinter.Label(stat_frame, textvariable=self.platform, font=STAT_CATAGORY_FONT, bg=STAT_BG_COLOR, fg=STAT_FG_COLOR).grid(row=1, column=1, sticky='w')
 
         # Entry Box
         self.user = tkinter.StringVar()
@@ -77,6 +78,7 @@ class MainWindow(tkinter.Tk):
         self.search_button.bind('<Button-1>', self.solo_player_stats)
 
         self.entry = tkinter.Entry(stat_frame, textvariable=self.user)
+        self.entry.insert(0, 'Enter Username')
         self.entry.grid(row=1, column=4, sticky='w')
 
         #######################
@@ -165,74 +167,80 @@ class MainWindow(tkinter.Tk):
     def solo_player_stats(self, *event):
         """Grab lifetime/seasonal solo stats"""
         player_data = self.grab_player_profile()
-        # Lifetime stats
-        solo_stats = player_data['stats']['p2']
-        self.account_name.set(player_data['epicUserHandle'])
-        self.platform.set(player_data['platformNameLong'])
-        self.matches_played.set(solo_stats['matches']['value'])
-        self.wins.set(solo_stats['top1']['value'])
-        self.win_per.set("%.2f" % ((solo_stats['top1']['valueInt'] / solo_stats['matches']['valueInt']) * 100) + "%")
-        self.kills.set(solo_stats['kills']['value'])
-        self.kdr.set(solo_stats['kd']['value'] + "%")
-        self.spm.set(solo_stats['scorePerMatch']['value'])
-        # Seasonal Stats
-        season_solo_stats = player_data['stats']['curr_p2']
-        self.season_matches_played.set(season_solo_stats['matches']['value'])
-        self.season_wins.set(season_solo_stats['top1']['value'])
-        self.season_win_per.set("%.2f" % ((season_solo_stats['top1']['valueInt'] / season_solo_stats['matches']['valueInt']) * 100) + "%")
-        self.season_kills.set(season_solo_stats['kills']['value'])
-        self.season_kdr.set(season_solo_stats['kd']['value'] + "%")
-        self.season_spm.set(season_solo_stats['scorePerMatch']['value'])
+        if player_data:
+            # Lifetime stats
+            solo_stats = player_data['stats']['p2']
+            self.account_name.set(player_data['epicUserHandle'])
+            self.platform.set(player_data['platformNameLong'])
+            self.matches_played.set(solo_stats['matches']['value'])
+            self.wins.set(solo_stats['top1']['value'])
+            self.win_per.set("%.2f" % ((solo_stats['top1']['valueInt'] / solo_stats['matches']['valueInt']) * 100) + "%")
+            self.kills.set(solo_stats['kills']['value'])
+            self.kdr.set(solo_stats['kd']['value'] + "%")
+            self.spm.set(solo_stats['scorePerMatch']['value'])
+            # Seasonal Stats
+            season_solo_stats = player_data['stats']['curr_p2']
+            self.season_matches_played.set(season_solo_stats['matches']['value'])
+            self.season_wins.set(season_solo_stats['top1']['value'])
+            self.season_win_per.set("%.2f" % ((season_solo_stats['top1']['valueInt'] / season_solo_stats['matches']['valueInt']) * 100) + "%")
+            self.season_kills.set(season_solo_stats['kills']['value'])
+            self.season_kdr.set(season_solo_stats['kd']['value'] + "%")
+            self.season_spm.set(season_solo_stats['scorePerMatch']['value'])
 
     def duo_player_stats(self):
         """Grab lifetime/seasonal duo stats"""
         player_data = self.grab_player_profile()
         # Lifetime stats
-        duo_stats = player_data['stats']['p10']
-        self.account_name.set(player_data['epicUserHandle'])
-        self.platform.set(player_data['platformNameLong'])
-        self.matches_played.set(duo_stats['matches']['value'])
-        self.wins.set(duo_stats['top1']['value'])
-        self.win_per.set("%.2f" % ((duo_stats['top1']['valueInt'] / duo_stats['matches']['valueInt']) * 100) + "%")
-        self.kills.set(duo_stats['kills']['value'])
-        self.kdr.set(duo_stats['kd']['value'] + "%")
-        self.spm.set(duo_stats['scorePerMatch']['value'])
-        # Seasonal Stats
-        season_duo_stats = player_data['stats']['curr_p10']
-        self.season_matches_played.set(season_duo_stats['matches']['value'])
-        self.season_wins.set(season_duo_stats['top1']['value'])
-        self.season_win_per.set("%.2f" % ((season_duo_stats['top1']['valueInt'] / season_duo_stats['matches']['valueInt']) * 100) + "%")
-        self.season_kills.set(season_duo_stats['kills']['value'])
-        self.season_kdr.set(season_duo_stats['kd']['value'] + "%")
-        self.season_spm.set(season_duo_stats['scorePerMatch']['value'])
+        if player_data:
+            duo_stats = player_data['stats']['p10']
+            self.account_name.set(player_data['epicUserHandle'])
+            self.platform.set(player_data['platformNameLong'])
+            self.matches_played.set(duo_stats['matches']['value'])
+            self.wins.set(duo_stats['top1']['value'])
+            self.win_per.set("%.2f" % ((duo_stats['top1']['valueInt'] / duo_stats['matches']['valueInt']) * 100) + "%")
+            self.kills.set(duo_stats['kills']['value'])
+            self.kdr.set(duo_stats['kd']['value'] + "%")
+            self.spm.set(duo_stats['scorePerMatch']['value'])
+            # Seasonal Stats
+            season_duo_stats = player_data['stats']['curr_p10']
+            self.season_matches_played.set(season_duo_stats['matches']['value'])
+            self.season_wins.set(season_duo_stats['top1']['value'])
+            self.season_win_per.set("%.2f" % ((season_duo_stats['top1']['valueInt'] / season_duo_stats['matches']['valueInt']) * 100) + "%")
+            self.season_kills.set(season_duo_stats['kills']['value'])
+            self.season_kdr.set(season_duo_stats['kd']['value'] + "%")
+            self.season_spm.set(season_duo_stats['scorePerMatch']['value'])
 
     def squad_player_stats(self):
         """Grab lifetime/seasonal squad stats"""
         player_data = self.grab_player_profile()
-        # Lifetime stats
-        squad_stats = player_data['stats']['p9']
-        self.account_name.set(player_data['epicUserHandle'])
-        self.platform.set(player_data['platformNameLong'])
-        self.matches_played.set(squad_stats['matches']['value'])
-        self.wins.set(squad_stats['top1']['value'])
-        self.win_per.set("%.2f" % ((squad_stats['top1']['valueInt'] / squad_stats['matches']['valueInt']) * 100) + "%")
-        self.kills.set(squad_stats['kills']['value'])
-        self.kdr.set(squad_stats['kd']['value'] + "%")
-        self.spm.set(squad_stats['scorePerMatch']['value'])
-        # Seasonal Stats
-        season_squad_stats = player_data['stats']['curr_p9']
-        self.season_matches_played.set(season_squad_stats['matches']['value'])
-        self.season_wins.set(season_squad_stats['top1']['value'])
-        self.season_win_per.set("%.2f" % ((season_squad_stats['top1']['valueInt'] / season_squad_stats['matches']['valueInt']) * 100) + "%")
-        self.season_kills.set(season_squad_stats['kills']['value'])
-        self.season_kdr.set(season_squad_stats['kd']['value'] + "%")
-        self.season_spm.set(season_squad_stats['scorePerMatch']['value'])
+        if player_data:
+            # Lifetime stats
+            squad_stats = player_data['stats']['p9']
+            self.account_name.set(player_data['epicUserHandle'])
+            self.platform.set(player_data['platformNameLong'])
+            self.matches_played.set(squad_stats['matches']['value'])
+            self.wins.set(squad_stats['top1']['value'])
+            self.win_per.set("%.2f" % ((squad_stats['top1']['valueInt'] / squad_stats['matches']['valueInt']) * 100) + "%")
+            self.kills.set(squad_stats['kills']['value'])
+            self.kdr.set(squad_stats['kd']['value'] + "%")
+            self.spm.set(squad_stats['scorePerMatch']['value'])
+            # Seasonal Stats
+            season_squad_stats = player_data['stats']['curr_p9']
+            self.season_matches_played.set(season_squad_stats['matches']['value'])
+            self.season_wins.set(season_squad_stats['top1']['value'])
+            self.season_win_per.set("%.2f" % ((season_squad_stats['top1']['valueInt'] / season_squad_stats['matches']['valueInt']) * 100) + "%")
+            self.season_kills.set(season_squad_stats['kills']['value'])
+            self.season_kdr.set(season_squad_stats['kd']['value'] + "%")
+            self.season_spm.set(season_squad_stats['scorePerMatch']['value'])
 
     def grab_player_profile(self):
         user = self.user.get()
         platform = 'pc'
         r = requests.get('https://api.fortnitetracker.com/v1/profile/{}/{}'.format(platform, user), headers=HEADERS)
         player_data = r.json()
+        if len(player_data) == 1:
+            messagebox.showerror("ERROR!", 'Username not found.')
+            return 0
         return player_data
 
     def tracker_page(self, event):
